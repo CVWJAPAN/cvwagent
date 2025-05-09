@@ -97,14 +97,14 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer YOUR_API_KEY_HERE"
+            "Authorization": "Bearer "
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
             messages: [{ role: "user", content: message }],
             max_tokens: 200
           })
-        });
+        });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
 
         const data = await response.json();
         addMessage(data.choices[0].message.content || 'No response from AI.', 'bot');
