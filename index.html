@@ -14,7 +14,7 @@
         p,li{font-size:14px;color:#333;line-height:1.5}
         .button{background:#ff69b4;color:#fff;padding:10px 20px;border:none;border-radius:10px;cursor:pointer;font-size:14px;margin:10px 0}
         .button:hover{background:#ff4f9a}
-        #chat-box,#place-list,#donation-report,#verification-status,#support-request,#support-reservation{border:1px solid #e0e0e0;border-radius:10px;padding:15px;height:150px;overflow-y:scroll;background:#f9f9f9;margin-bottom:15px}
+        #chat-box,#place-list,#donation-report,#verification-status,#support-request,#support-reservation,#donation-counter{border:1px solid #e0e0e0;border-radius:10px;padding:15px;height:150px;overflow-y:scroll;background:#f9f9f9;margin-bottom:15px}
         .chat-message,.place-item,.donation-item,.verification-item,.request-item,.reservation-item{margin:8px 0;padding:8px;border-radius:8px;font-size:13px}
         .hub-message{background:#ffe4e1;max-width:80%;margin-left:5px}
         .user-message{background:#f5e1ff;text-align:right;max-width:80%;margin-left:auto;margin-right:5px}
@@ -23,6 +23,7 @@
         select{width:calc(100% - 20px);padding:8px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px}
         #points{display:inline-block;background:#ffe4e1;padding:5px 10px;border-radius:10px;font-size:14px;margin-bottom:10px}
         .premium{background:#98fb98;padding:5px}
+        #donation-counter span{font-size:18px;color:#c71585}
     </style>
 </head>
 <body>
@@ -42,12 +43,13 @@
         </div>
         <input type="text" id="user-input" placeholder="相談を入力..." onkeypress="if(event.key === 'Enter') sendMessage()">
         <button onclick="sendMessage()" class="button">送信</button>
-        <h2>子供食堂を探す</h2>
-        <select id="prefecture">
-            <option value="local">現在の地域（おあがり）</option>
-        </select>
-        <button class="button" onclick="findPlace()">検索</button>
-        <div id="place-list"></div>
+        <h2>寄付状況</h2>
+        <div id="donation-counter">
+            <p>寄付総額: <span id="donation-total">0</span> 円 (目標: 10000円)</p>
+            <button class="button" onclick="addDonation(100)">100円寄付</button>
+            <button class="button" onclick="addDonation(500)">500円寄付</button>
+            <p id="donation-message"></p>
+        </div>
         <h2>食料支援依頼（地方の貧困世帯向け）</h2>
         <input type="text" id="support-input" placeholder="支援内容（例: 米5kg）..." onkeypress="if(event.key === 'Enter') requestSupport()">
         <select id="disability">
@@ -66,37 +68,19 @@
         <input type="text" id="support-address" placeholder="配布先住所（例: 東京都XX区XX町）..." onkeypress="if(event.key === 'Enter') requestSupport()">
         <button class="button" onclick="requestSupport()">依頼</button>
         <div id="support-request"></div>
-        <h2>食料支援予約</h2>
-        <select id="reservation-date">
-            <option value="2025-05-20">2025年5月20日</option>
-            <option value="2025-05-21">2025年5月21日</option>
-        </select>
-        <select id="special-menu">
-            <option value="standard">通常メニュー</option>
-            <option value="sensory">感覚過敏対応</option>
-        </select>
-        <input type="text" id="reservation-address" placeholder="配布先住所（例: 東京都XX区XX町）..." onkeypress="if(event.key === 'Enter') reserveSupport()">
-        <button class="button" onclick="reserveSupport()">予約</button>
-        <div id="support-reservation"></div>
-        <h2>寄付状況</h2>
-        <div id="donation-report">
-            <div class="donation-item">寄付金の使途: 60% 子供食堂運営, 30% 教材, 10% 運営費<br>注: 非常食および賞味期限切れの食品は配布しません。配布先が不明な場合は配布できません。個人情報は厳格に管理します。</div>
-            <a href="https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS" target="_blank" class="button">今すぐ寄付</a>
-        </div>
-        <h2>検証状況</h2>
-        <div id="verification-status">
-            <div class="verification-item">2025年5月16日: 『みんなの居場所おあがり』、検証済み</div>
-        </div>
     </div>
 
     <script>
         let userPoints = 100;
         let isPremium = false;
         let userProfile = { childAge: 5, needs: ["発達"] };
+        let donationTotal = 0; // 初期値を0円に変更
+
         function startHub(){
             document.getElementById("welcome-screen").style.display="none";
             document.getElementById("hub-container").style.display="block";
         }
+
         function sendMessage(){
             const e=document.getElementById("user-input"),t=document.getElementById("chat-box"),n=e.value.trim().toLowerCase();
             if(n){
@@ -111,51 +95,17 @@
                 e.value="",t.scrollTop=t.scrollHeight;
             }
         }
+
         function getAIResponse(e){
             if(e.includes("貧困")){
                 return "「みんなの居場所おあがり」は地方の貧困世帯向けに食料支援を提供します。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。依頼は下のフォームから。寄付はこちら: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>Square支払いリンク</a>";
-            }else if(e.includes("発達") || e.includes("障がい")){
-                return userProfile.needs.includes("発達") && userProfile.childAge <= 5
-                    ? "障がいのあるお子さん向けに感覚過敏対応メニューを提供します。非常食は使用しません。配布先住所を指定してください。予約は下からどうぞ。"
-                    : "障がいのあるお子さん向けに特別対応可能です。支援を依頼してください。";
-            }else if(e.includes("ボランティア")){
-                return "「みんなの居場所おあがり」でボランティアが可能です！ポイントを貯めてください。";
-            }else if(e.includes("寄付") || e.includes("使途")){
-                return "寄付金の60%は子供食堂運営、30%は教材、10%は運営費です。非常食および賞味期限切れの食品は配布しません。配布先が不明な場合は配布できません。個人情報は厳格に管理します。寄付はこちら: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>Square支払いリンク</a>";
-            }else if(e.includes("実在") || e.includes("信頼")){
-                return "「みんなの居場所おあがり」は検証済み。非常食は使用せず、安全な食料のみを提供します。配布先が不明な場合は配布できません。個人情報は厳格に管理します。";
             }else if(e.includes("個人情報")){
                 return "配布には住所が必要です。個人情報は支援目的のみに使用し、厳格に管理します。詳細は<a href='https://cvwjapan-1.jimdosite.com/privacy-policy' target='_blank'>プライバシーポリシー</a>をご覧ください。";
             }else{
-                return "「みんなの居場所おあがり」では食料支援や予約が可能です。配布先住所を指定してください。個人情報は厳格に管理します。"+(isPremium?"<span class='premium'>プレミアム特典: 優先予約</span>":"");
+                return "「みんなの居場所おあがり」では食料支援が可能です。配布先住所を指定してください。"+(isPremium?"<span class='premium'>プレミアム特典: 優先予約</span>":"");
             }
         }
-        function findPlace(){
-            const pref=document.getElementById("prefecture").value, results=document.getElementById("place-list");results.innerHTML="";
-            const places=[
-                {pref:"local", name:"みんなの居場所おあがり", desc:"無料食事・発達支援あり", status:"予約可", support:"貧困・発達優先", points:10, verified:"2025-05-16"}
-            ];
-            const filtered=places.filter(p=>p.pref===pref);
-            if(filtered.length===0){
-                const noPlace=document.createElement("div");noPlace.className="place-item";noPlace.innerText="該当する子供食堂が見つかりませんでした。";results.appendChild(noPlace);
-            }else{
-                filtered.forEach(p=>{
-                    const item=document.createElement("div");item.className="place-item";
-                    item.innerHTML=`${p.name}: ${p.desc} (${p.status})<br>対象: ${p.support}<br>必要ポイント: ${p.points}<br>検証日: ${p.verified}<br><button class="button" style="font-size:12px;padding:5px 10px;" onclick="reservePlace(${p.points}, '${p.name}')">${p.status==="予約可"?"予約":"詳細"}</button>`;
-                    results.appendChild(item);
-                });
-            }
-            results.style.display="block";
-        }
-        function reservePlace(points, name){
-            if(isPremium || userPoints >= points){
-                userPoints -= points;
-                document.getElementById("points-value").innerText = userPoints;
-                alert(`${name}を予約しました！残高: ${userPoints} Supportポイント`);
-            }else{
-                alert("ポイントが足りません！プレミアム会員か寄付で貯めてね。");
-            }
-        }
+
         function requestSupport(){
             const e=document.getElementById("support-input"), d=document.getElementById("disability").value, a=document.getElementById("allergy").value, ad=document.getElementById("allergy-detail").value, addr=document.getElementById("support-address").value, t=document.getElementById("support-request"), n=e.value.trim();
             if(n && addr){
@@ -170,29 +120,18 @@
                 alert("配布先住所を入力してください。");
             }
         }
-        function reserveSupport(){
-            const date=document.getElementById("reservation-date").value, menu=document.getElementById("special-menu").value, addr=document.getElementById("reservation-address").value, t=document.getElementById("support-reservation");
-            if(addr && (userPoints >= 10 || isPremium)){
-                userPoints -= 10;
-                document.getElementById("points-value").innerText = userPoints;
-                const item=document.createElement("div");item.className="reservation-item";
-                item.innerText=`予約: ${date}, メニュー: ${menu}, 住所: ${addr}, 残高: ${userPoints} Supportポイント（非常食は使用しません）`;
-                t.appendChild(item);
-                t.scrollTop = t.scrollHeight;
-                addr.value="";
-            }else{
-                alert("配布先住所を入力するか、ポイントが足りません！寄付で貯めてください。");
+
+        function addDonation(amount) {
+            donationTotal += amount;
+            document.getElementById("donation-total").innerText = donationTotal;
+            const message = document.getElementById("donation-message");
+            message.innerText = `${amount}円の寄付ありがとうございます！`;
+            setTimeout(() => { message.innerText = ""; }, 3000); // 3秒後にメッセージ消去
+            if (donationTotal >= 10000) {
+                message.innerText = "目標達成！次の支援準備に入ります。";
             }
         }
-        function donate(){
-            userPoints += 10;
-            document.getElementById("points-value").innerText = userPoints;
-            const report=document.getElementById("donation-report");
-            const item=document.createElement("div");item.className="donation-item";
-            item.innerText="寄付ありがとう！100円を追加。Square経由で処理されました。非常食および賞味期限切れの食品は配布しません。配布先が不明な場合は配布できません。";
-            report.appendChild(item);
-            report.scrollTop = report.scrollHeight;
-        }
+
         function upgradePremium(){
             isPremium = true;
             alert("プレミアム会員になりました！月額500円で優先予約が可能に。Squareで支払い: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>こちら</a>");
