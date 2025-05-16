@@ -9,22 +9,50 @@
     <style>
         body{margin:0;padding:20px;text-align:center}
         #hub-container{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:10px}
-        #ar-section{margin:30px auto;max-width:600px;background:#fff;padding:20px;border-radius:10px}
+        #ar-section{margin:30px auto;max-width:600px;background:#fff;padding:20px}
         a-scene{width:100%;height:300px;max-height:300px;overflow:hidden}
+        input,select{width:90%;padding:8px;margin:5px}
     </style>
 </head>
 <body>
-    <div id="hub-container">
-        <h1>みんなの居場所おあがり</h1>
-        <h2>ARでメニュー確認</h2>
-        <div id="ar-section">
-            <p>Hiroマーカーで確認（<a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/patterns/Hiro.pdf">PDF</a>）</p>
-            <a-scene embedded arjs="sourceType: webcam;">
-                <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0 -2"></a-text>
-                <a-marker-camera preset="hiro"></a-marker-camera>
-            </a-scene>
-        </div>
-        <p><a href="reports.html">報告を見る</a></p>
+<div id="hub-container">
+    <h1>みんなの居場所おあがり</h1>
+    <h2>寄付状況（目標: 50,000,000円）</h2>
+    <div id="donation-counter">
+        <p>寄付総額: <span id="donation-total">0</span> 円</p>
+        <button onclick="addDonation(500)">500円</button>
+        <button onclick="addDonation(1000)">1000円</button>
     </div>
+    <h2>食料支援依頼</h2>
+    <form id="support-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input name="content" placeholder="支援内容（例: 米5kg)">
+        <select name="allergy">
+            <option value="none">アレルギーなし</option>
+            <option value="egg">卵</option>
+            <option value="milk">乳製品</option>
+        </select>
+        <input name="address" placeholder="住所">
+        <button type="submit">依頼</button>
+    </form>
+    <h2>ARでメニュー確認</h2>
+    <div id="ar-section">
+        <p>Hiroマーカーで確認（<a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/patterns/Hiro.pdf">PDF</a>）</p>
+        <a-scene embedded arjs="sourceType: webcam;">
+            <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0 -2"></a-text>
+            <a-marker-camera preset="hiro"></a-marker-camera>
+        </a-scene>
+    </div>
+</div>
+<script>
+    function addDonation(amount) {
+        let total = parseInt(document.getElementById("donation-total").innerText) || 0;
+        total += amount;
+        document.getElementById("donation-total").innerText = total;
+    }
+    document.getElementById("support-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        fetch(this.action, {method:"POST", body:new FormData(this)}).then(r => alert("送信完了"));
+    });
+</script>
 </body>
 </html>
