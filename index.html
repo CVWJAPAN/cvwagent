@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Kids Support Hub</title>
+    <title>みんなの居場所おあがり（誰でも食堂）</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-ar@0.5.0/dist/aframe-ar.min.js"></script>
     <style>
         body{font-family:Arial,sans-serif;margin:0;padding:20px;text-align:center}
         #welcome-screen,#hub-container{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:10px;text-align:left}
@@ -15,25 +17,27 @@
         .button:hover{background:#ff4f9a}
         #donation-counter,#support-request{border:1px solid #e0e0e0;border-radius:10px;padding:15px;height:100px;overflow-y:scroll}
         input,select{width:calc(100% - 20px);padding:8px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:10px}
+        #ar-section{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:10px;text-align:left}
     </style>
 </head>
 <body>
     <div id="welcome-screen">
-        <h1>Global Kids Support Hub</h1>
-        <p>「みんなの居場所おあがり」が地方の貧困世帯を支援！ハブを始めるボタンを押してください。</p>
+        <h1>みんなの居場所おあがり（誰でも食堂）</h1>
+        <p>地域住民が集う食事と交流の場を提供します。ハブを始めるボタンを押してください。</p>
         <button class="button" onclick="startHub()">ハブを始める</button>
     </div>
     <div id="hub-container">
-        <h1>Global Kids Support Hub</h1>
+        <h1>みんなの居場所おあがり（誰でも食堂）</h1>
         <h2>寄付状況（目標: 50,000,000円）</h2>
         <div id="donation-counter">
             <p>寄付総額: <span id="donation-total">0</span> 円</p>
             <button class="button" onclick="addDonation(500)">500円寄付</button>
             <button class="button" onclick="addDonation(1000)">1000円寄付</button>
         </div>
-        <h2>食料支援依頼（月1回抽選）</h2>
-        <p>毎月1日に2世帯が選ばれます。アレルギー対応が可能です。申請内容は cvwjapan@gmail.com に送信されます。</p>
-        <form id="support-form" action="https://formspree.io/f/xpzvqkdl" method="POST">
+
+        <h2>食料支援依頼（別プロジェクト）</h2>
+        <p>支援内容は cvwjapan@gmail.com に送信されます。ARでメニュー確認も可能です。</p>
+        <form id="support-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
             <input type="text" name="content" id="support-input" placeholder="支援内容（例: 米5kg）">
             <select name="allergy" id="allergy">
                 <option value="none">アレルギーなし</option>
@@ -47,6 +51,17 @@
             <button type="submit" class="button">依頼</button>
         </form>
         <div id="support-request"></div>
+
+        <h2>ARでメニュー確認</h2>
+        <div id="ar-section">
+            <p>スマホでHiroマーカーを読み込んでください（<a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/patterns/Hiro.pdf" target="_blank">マーカーPDF</a>）。</p>
+            <a-scene embedded arjs="sourceType: webcam;">
+                <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0 -2"></a-text>
+                <a-marker-camera preset="hiro"></a-marker-camera>
+            </a-scene>
+        </div>
+
+        <p><a href="reports.html" class="button">みんなの居場所おあがり（誰でも食堂）の予定・実施報告・収支報告を見る</a></p>
     </div>
 
     <script>
@@ -62,13 +77,12 @@
         }
 
         document.getElementById("support-form").addEventListener("submit", function(event) {
-            event.preventDefault(); // デフォルトのフォーム送信を防止
+            event.preventDefault();
             const content = document.getElementById("support-input").value.trim();
             const allergy = document.getElementById("allergy").value;
             const allergyDetail = document.getElementById("allergy-detail").value.trim();
             const addr = document.getElementById("support-address").value.trim();
             if (content && addr) {
-                // 画面に表示
                 const requests = document.getElementById("support-request");
                 const item = document.createElement("div");
                 const allergyInfo = allergy !== "none" ? `, アレルギー: ${allergy}${allergyDetail ? ` (${allergyDetail})` : ""}` : "";
@@ -76,7 +90,6 @@
                 requests.appendChild(item);
                 requests.scrollTop = requests.scrollHeight;
 
-                // Formspreeでメール送信
                 fetch(this.action, {
                     method: "POST",
                     body: new FormData(this),
