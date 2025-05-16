@@ -32,18 +32,20 @@
             <button class="button" onclick="addDonation(1000)">1000円寄付</button>
         </div>
         <h2>食料支援依頼（月1回抽選）</h2>
-        <p>毎月1日に2世帯が選ばれます。アレルギー対応が可能です。</p>
-        <input type="text" id="support-input" placeholder="支援内容（例: 米5kg）">
-        <select id="allergy">
-            <option value="none">アレルギーなし</option>
-            <option value="egg">卵</option>
-            <option value="milk">乳製品</option>
-            <option value="wheat">小麦</option>
-            <option value="other">その他</option>
-        </select>
-        <input type="text" id="allergy-detail" placeholder="アレルギー詳細（例: ピーナッツ）">
-        <input type="text" id="support-address" placeholder="住所（例: 〒123-4567 東京都XX区）">
-        <button class="button" onclick="requestSupport()">依頼</button>
+        <p>毎月1日に2世帯が選ばれます。アレルギー対応が可能です。申請内容は cvwjapan@gmail.com に送信されます。</p>
+        <form id="support-form" action="https://formspree.io/f/xpzvqkdl" method="POST">
+            <input type="text" name="content" id="support-input" placeholder="支援内容（例: 米5kg）">
+            <select name="allergy" id="allergy">
+                <option value="none">アレルギーなし</option>
+                <option value="egg">卵</option>
+                <option value="milk">乳製品</option>
+                <option value="wheat">小麦</option>
+                <option value="other">その他</option>
+            </select>
+            <input type="text" name="allergy-detail" id="allergy-detail" placeholder="アレルギー詳細（例: ピーナッツ）">
+            <input type="text" name="address" id="support-address" placeholder="住所（例: 〒123-4567 東京都XX区）">
+            <button type="submit" class="button">依頼</button>
+        </form>
         <div id="support-request"></div>
     </div>
 
@@ -59,26 +61,43 @@
             document.getElementById("donation-total").innerText = total.toLocaleString();
         }
 
-        function requestSupport(){
+        document.getElementById("support-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // デフォルトのフォーム送信を防止
             const content = document.getElementById("support-input").value.trim();
             const allergy = document.getElementById("allergy").value;
             const allergyDetail = document.getElementById("allergy-detail").value.trim();
             const addr = document.getElementById("support-address").value.trim();
             if (content && addr) {
+                // 画面に表示
                 const requests = document.getElementById("support-request");
                 const item = document.createElement("div");
                 const allergyInfo = allergy !== "none" ? `, アレルギー: ${allergy}${allergyDetail ? ` (${allergyDetail})` : ""}` : "";
                 item.innerText = `依頼: ${content}, 住所: ${addr}${allergyInfo}`;
                 requests.appendChild(item);
-                document.getElementById("support-input").value = "";
-                document.getElementById("allergy").value = "none";
-                document.getElementById("allergy-detail").value = "";
-                document.getElementById("support-address").value = "";
                 requests.scrollTop = requests.scrollHeight;
+
+                // Formspreeでメール送信
+                fetch(this.action, {
+                    method: "POST",
+                    body: new FormData(this),
+                    headers: { "Accept": "application/json" }
+                }).then(response => {
+                    if (response.ok) {
+                        alert("申請が cvwjapan@gmail.com に送信されました。");
+                        document.getElementById("support-input").value = "";
+                        document.getElementById("allergy").value = "none";
+                        document.getElementById("allergy-detail").value = "";
+                        document.getElementById("support-address").value = "";
+                    } else {
+                        alert("送信に失敗しました。もう一度お試しください。");
+                    }
+                }).catch(error => {
+                    alert("エラーが発生しました: " + error);
+                });
             } else {
                 alert("支援内容と住所を入力してください。");
             }
-        }
+        });
     </script>
 </body>
 </html>
