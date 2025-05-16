@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>みんなの居場所おあがり</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-ar@0.5.0/dist/aframe-ar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/AR.js@2.7.7/aframe/build/aframe-ar.js"></script>
     <style>
-        body{margin:0;padding:20px;text-align:center}
-        #hub-container{max-width:600px;margin:0 auto;background:#fff;padding:20px;border-radius:10px}
-        #ar-section{margin:30px auto;max-width:600px;background:#fff;padding:20px}
-        a-scene{width:100%;height:300px;max-height:300px;overflow:hidden}
-        input,select{width:90%;padding:8px;margin:5px}
+        body { margin: 0; padding: 20px; text-align: center }
+        #hub-container { max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px }
+        #ar-section { margin: 30px auto; max-width: 600px; background: #fff; padding: 20px }
+        a-scene { width: 100%; height: 300px; max-height: 300px; overflow: hidden }
+        input, select { width: 90%; padding: 8px; margin: 5px }
     </style>
 </head>
 <body>
@@ -37,9 +37,11 @@
     <h2>ARでメニュー確認</h2>
     <div id="ar-section">
         <p>Hiroマーカーで確認（<a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/patterns/Hiro.pdf">PDF</a>）</p>
-        <a-scene embedded arjs="sourceType: webcam;">
-            <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0 -2"></a-text>
-            <a-marker-camera preset="hiro"></a-marker-camera>
+        <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; patternRatio: 0.90; debugUIEnabled: false;">
+            <a-marker preset="hiro">
+                <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0.5 0" scale="1 1 1" align="center"></a-text>
+            </a-marker>
+            <a-entity camera></a-entity>
         </a-scene>
     </div>
 </div>
@@ -51,7 +53,7 @@
     }
     document.getElementById("support-form").addEventListener("submit", function(e) {
         e.preventDefault();
-        fetch(this.action, {method:"POST", body:new FormData(this)}).then(r => alert("送信完了"));
+        fetch(this.action, { method: "POST", body: new FormData(this) }).then(r => alert("送信完了"));
     });
 </script>
 </body>
