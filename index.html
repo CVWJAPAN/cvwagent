@@ -14,12 +14,13 @@
         .button{background:#ff69b4;color:#fff;padding:10px;border:none;border-radius:10px;cursor:pointer}
         .button:hover{background:#ff4f9a}
         #donation-counter,#support-request{border:1px solid #e0e0e0;border-radius:10px;padding:15px;height:100px;overflow-y:scroll}
+        input,select{width:calc(100% - 20px);padding:8px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:10px}
     </style>
 </head>
 <body>
     <div id="welcome-screen">
         <h1>Global Kids Support Hub</h1>
-        <p>「みんなの居場所おあがり」が支援します。ハブを始めるボタンを押してください。</p>
+        <p>「みんなの居場所おあがり」が地方の貧困世帯を支援！ハブを始めるボタンを押してください。</p>
         <button class="button" onclick="startHub()">ハブを始める</button>
     </div>
     <div id="hub-container">
@@ -31,7 +32,16 @@
             <button class="button" onclick="addDonation(1000)">1000円寄付</button>
         </div>
         <h2>食料支援依頼（月1回抽選）</h2>
-        <p>毎月1日に2世帯が選ばれます。</p>
+        <p>毎月1日に2世帯が選ばれます。アレルギー対応が可能です。</p>
+        <input type="text" id="support-input" placeholder="支援内容（例: 米5kg）">
+        <select id="allergy">
+            <option value="none">アレルギーなし</option>
+            <option value="egg">卵</option>
+            <option value="milk">乳製品</option>
+            <option value="wheat">小麦</option>
+            <option value="other">その他</option>
+        </select>
+        <input type="text" id="allergy-detail" placeholder="アレルギー詳細（例: ピーナッツ）">
         <input type="text" id="support-address" placeholder="住所（例: 〒123-4567 東京都XX区）">
         <button class="button" onclick="requestSupport()">依頼</button>
         <div id="support-request"></div>
@@ -50,16 +60,23 @@
         }
 
         function requestSupport(){
+            const content = document.getElementById("support-input").value.trim();
+            const allergy = document.getElementById("allergy").value;
+            const allergyDetail = document.getElementById("allergy-detail").value.trim();
             const addr = document.getElementById("support-address").value.trim();
-            if (addr) {
+            if (content && addr) {
                 const requests = document.getElementById("support-request");
                 const item = document.createElement("div");
-                item.innerText = `住所: ${addr}`;
+                const allergyInfo = allergy !== "none" ? `, アレルギー: ${allergy}${allergyDetail ? ` (${allergyDetail})` : ""}` : "";
+                item.innerText = `依頼: ${content}, 住所: ${addr}${allergyInfo}`;
                 requests.appendChild(item);
+                document.getElementById("support-input").value = "";
+                document.getElementById("allergy").value = "none";
+                document.getElementById("allergy-detail").value = "";
                 document.getElementById("support-address").value = "";
                 requests.scrollTop = requests.scrollHeight;
             } else {
-                alert("住所を入力してください。");
+                alert("支援内容と住所を入力してください。");
             }
         }
     </script>
