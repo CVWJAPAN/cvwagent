@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>みんなの居場所おあがり</title>
+    <title>みんなの居場所おあがり - ARコンテンツ</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -36,14 +36,15 @@
     </form>
     <h2>ARでメニュー確認</h2>
     <div id="ar-section">
-        <p>Hiroマーカーで確認（<a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/pattern-hiro.png">PNG</a>）</p>
-        <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@2.7.7/data/data/pattern-hiro.patt; maxTrack: 1;" embedded>
+        <p>カスタムマーカーで確認（<a href="./custom-marker.png">PNG</a>を印刷してください）</p>
+        <a-scene mindar-image="imageTargetSrc: ./custom-marker.patt; maxTrack: 1;" embedded>
             <a-assets>
-                <img id="hiro" src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/pattern-hiro.png" />
+                <img id="custom" src="./custom-marker.png" />
             </a-assets>
             <a-entity mindar-image-target="targetIndex: 0">
                 <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0.5 0" scale="1 1 1" align="center"></a-text>
-                <a-box position="0 0.5 -0.5" rotation="0 45 0" color="#4CC3D9"></a-box>
+                <a-box position="0 0.5 -0.5" rotation="0 45 0" color="#4CC3D9" scale="0.5 0.5 0.5"></a-box>
+                <a-cylinder position="0.5 0.5 -0.5" radius="0.2" height="0.5" color="#FF6347"></a-cylinder>
             </a-entity>
             <a-entity camera></a-entity>
         </a-scene>
