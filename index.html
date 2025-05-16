@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
     <title>Global Kids Support Hub</title>
     <style>
         body{font-family:Arial,sans-serif;background:#fff5f5;margin:0;padding:20px;text-align:center}
@@ -24,13 +25,14 @@
         #points{display:inline-block;background:#ffe4e1;padding:5px 10px;border-radius:10px;font-size:14px;margin-bottom:10px}
         .premium{background:#98fb98;padding:5px}
         #donation-counter span{font-size:18px;color:#c71585}
+        .selected{background:#90ee90} /* 抽選で選ばれた申請のスタイル */
     </style>
 </head>
 <body>
     <div id="welcome-screen">
         <h1>Global Kids Support Hub</h1>
         <p>「みんなの居場所おあがり」が地方の貧困世帯を支援！地域児童センター建設を目指します。非常食および賞味期限切れの食品は配布しません。配布先が不明な場合は配布できません。</p>
-        <p><strong>注意:</strong> 配布には住所が必要です。個人情報は厳格に管理し、支援目的以外には使用しません。<a href="https://cvwjapan-1.jimdosite.com/privacy-policy" target="_blank">プライバシーポリシー</a></p>
+        <p><strong>セキュリティ:</strong> 個人情報は暗号化通信で保護し、支援目的以外には使用しません。詳細は<a href="https://cvwjapan-1.jimdosite.com/privacy-policy" target="_blank">プライバシーポリシー</a>をご覧ください。</p>
         <button class="button" onclick="startHub()">ハブを始める</button>
     </div>
     <div id="hub-container">
@@ -38,8 +40,9 @@
         <h2>寄付状況（地域児童センター建設目標: 50,000,000円）</h2>
         <div id="donation-counter">
             <p>寄付総額: <span id="donation-total">0</span> 円 (目標: 50,000,000円)</p>
-            <button class="button" onclick="addDonation(100)">100円寄付</button>
             <button class="button" onclick="addDonation(500)">500円寄付</button>
+            <button class="button" onclick="addDonation(1000)">1000円寄付</button>
+            <p>寄付はこちら: <a href="https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS" target="_blank">Square支払いリンク</a></p>
             <p id="donation-message"></p>
         </div>
         <div id="points">ポイント残高: <span id="points-value">100</span> Supportポイント</div>
@@ -50,7 +53,8 @@
         </div>
         <input type="text" id="user-input" placeholder="相談を入力..." onkeypress="if(event.key === 'Enter') sendMessage()">
         <button onclick="sendMessage()" class="button">送信</button>
-        <h2>食料支援依頼（地方の貧困世帯向け）</h2>
+        <h2>食料支援依頼（地方の貧困世帯向け、月1回抽選）</h2>
+        <p><strong>注意:</strong> 毎月1日に抽選で2世帯を選択します。1世帯1回限りで、重複申請は無効となります。</p>
         <input type="text" id="support-input" placeholder="支援内容（例: 米5kg）..." onkeypress="if(event.key === 'Enter') requestSupport()">
         <select id="disability">
             <option value="none">障がいなし</option>
@@ -65,20 +69,24 @@
             <option value="other">その他</option>
         </select>
         <input type="text" id="allergy-detail" placeholder="具体的なアレルギー（任意）..." onkeypress="if(event.key === 'Enter') requestSupport()">
-        <input type="text" id="support-address" placeholder="配布先住所（例: 東京都XX区XX町）..." onkeypress="if(event.key === 'Enter') requestSupport()">
+        <input type="text" id="support-address" placeholder="配布先住所（例: 〒123-4567 東京都XX区XX町）..." onkeypress="if(event.key === 'Enter') requestSupport()">
         <button class="button" onclick="requestSupport()">依頼</button>
         <div id="support-request"></div>
+        <button class="button" onclick="runLottery()">抽選実行（テスト用）</button>
     </div>
 
     <script>
         let userPoints = 100;
         let isPremium = false;
         let userProfile = { childAge: 5, needs: ["発達"] };
-        let donationTotal = 0; // 初期値を0円に
+        let donationTotal = 0; // 初期値を0円
+        let submittedAddresses = localStorage.getItem("submittedAddresses") ? JSON.parse(localStorage.getItem("submittedAddresses")) : [];
+        let currentMonthRequests = []; // 月ごとの申請リスト
 
         function startHub(){
             document.getElementById("welcome-screen").style.display="none";
             document.getElementById("hub-container").style.display="block";
+            loadMonthlyRequests();
         }
 
         function sendMessage(){
@@ -98,7 +106,7 @@
 
         function getAIResponse(e){
             if(e.includes("貧困")){
-                return "「みんなの居場所おあがり」は地方の貧困世帯向けに食料支援を提供します。地域児童センター建設を目指しています。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。依頼は下のフォームから。寄付はこちら: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>Square支払いリンク</a>";
+                return "「みんなの居場所おあがり」は地方の貧困世帯向けに食料支援を提供します。地域児童センター建設を目指しています。毎月1日に抽選で2世帯を選択。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。依頼は下のフォームから。寄付はこちら: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>Square支払いリンク</a>";
             }else if(e.includes("個人情報")){
                 return "配布には住所が必要です。個人情報は支援目的のみに使用し、厳格に管理します。詳細は<a href='https://cvwjapan-1.jimdosite.com/privacy-policy' target='_blank'>プライバシーポリシー</a>をご覧ください。";
             }else{
@@ -106,19 +114,62 @@
             }
         }
 
+        function validateAddress(addr) {
+            const postalCodePattern = /^\d{3}-\d{4}/;
+            return postalCodePattern.test(addr.split(" ")[0]);
+        }
+
         function requestSupport(){
             const e=document.getElementById("support-input"), d=document.getElementById("disability").value, a=document.getElementById("allergy").value, ad=document.getElementById("allergy-detail").value, addr=document.getElementById("support-address").value, t=document.getElementById("support-request"), n=e.value.trim();
             if(n && addr){
+                if(!validateAddress(addr)){
+                    alert("住所は「〒123-4567 東京都XX区XX町」の形式で入力してください。");
+                    return;
+                }
+                if(submittedAddresses.includes(addr)){
+                    alert("この住所は既に申請されています。");
+                    return;
+                }
                 const item=document.createElement("div");item.className="request-item";
                 const priority = d !== "none" ? "（優先対応）" : "";
                 const allergyInfo = a !== "none" ? `, アレルギー: ${a} (${ad || "詳細なし"})` : "";
                 item.innerText=`依頼: ${n}, 住所: ${addr}, 障がい: ${d}${priority}${allergyInfo}`;
                 t.appendChild(item);
-                t.scrollTop = t.scrollHeight;
+                currentMonthRequests.push({ address: addr, element: item });
+                submittedAddresses.push(addr);
+                localStorage.setItem("submittedAddresses", JSON.stringify(submittedAddresses));
                 e.value=""; ad.value=""; addr.value="";
+                t.scrollTop = t.scrollHeight;
             } else {
                 alert("配布先住所を入力してください。");
             }
+        }
+
+        function loadMonthlyRequests() {
+            const now = new Date();
+            const currentMonth = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, '0');
+            const storedMonth = localStorage.getItem("currentMonth");
+            if (!storedMonth || storedMonth !== currentMonth) {
+                currentMonthRequests = [];
+                localStorage.setItem("currentMonth", currentMonth);
+                const requests = document.getElementById("support-request");
+                requests.innerHTML = ""; // 月初めにリセット
+            }
+        }
+
+        function runLottery() {
+            if (currentMonthRequests.length < 2) {
+                alert("抽選には最低2件の申請が必要です。");
+                return;
+            }
+            const winners = [];
+            while (winners.length < 2 && currentMonthRequests.length > 0) {
+                const index = Math.floor(Math.random() * currentMonthRequests.length);
+                const winner = currentMonthRequests.splice(index, 1)[0];
+                winners.push(winner);
+                winner.element.className = "request-item selected";
+            }
+            alert("抽選結果: 2世帯が選ばれました。運営が連絡します。");
         }
 
         function addDonation(amount) {
