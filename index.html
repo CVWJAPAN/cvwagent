@@ -25,7 +25,7 @@
         #points{display:inline-block;background:#ffe4e1;padding:5px 10px;border-radius:10px;font-size:14px;margin-bottom:10px}
         .premium{background:#98fb98;padding:5px}
         #donation-counter span{font-size:18px;color:#c71585}
-        .selected{background:#90ee90} /* 抽選で選ばれた申請のスタイル */
+        .selected{background:#90ee90}
     </style>
 </head>
 <body>
@@ -49,7 +49,7 @@
         <button class="button" onclick="upgradePremium()">プレミアム会員になる（500円/月）</button>
         <h2>Kids Helper AIに相談</h2>
         <div id="chat-box">
-            <div class="chat-message hub-message">Kids Helper AI: こんにちは！「みんなの居場所おあがり」が地方の貧困世帯を支援します。地域児童センター建設を目指しています。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。寄付はこちら: <a href="https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS" target="_blank">Square支払いリンク</a></div>
+            <div class="chat-message hub-message">Kids Helper AI: こんにちは！「みんなの居場所おあがり」が地方の貧困世帯を支援します。地域児童センター建設を目指しています。毎月1日に抽選で2世帯を選択。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。寄付はこちら: <a href="https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS" target="_blank">Square支払いリンク</a></div>
         </div>
         <input type="text" id="user-input" placeholder="相談を入力..." onkeypress="if(event.key === 'Enter') sendMessage()">
         <button onclick="sendMessage()" class="button">送信</button>
@@ -79,9 +79,9 @@
         let userPoints = 100;
         let isPremium = false;
         let userProfile = { childAge: 5, needs: ["発達"] };
-        let donationTotal = 0; // 初期値を0円
+        let donationTotal = 0;
         let submittedAddresses = localStorage.getItem("submittedAddresses") ? JSON.parse(localStorage.getItem("submittedAddresses")) : [];
-        let currentMonthRequests = []; // 月ごとの申請リスト
+        let currentMonthRequests = [];
 
         function startHub(){
             document.getElementById("welcome-screen").style.display="none";
@@ -153,7 +153,7 @@
                 currentMonthRequests = [];
                 localStorage.setItem("currentMonth", currentMonth);
                 const requests = document.getElementById("support-request");
-                requests.innerHTML = ""; // 月初めにリセット
+                requests.innerHTML = "";
             }
         }
 
@@ -174,10 +174,10 @@
 
         function addDonation(amount) {
             donationTotal += amount;
-            document.getElementById("donation-total").innerText = donationTotal.toLocaleString(); // 3桁区切り
+            document.getElementById("donation-total").innerText = donationTotal.toLocaleString();
             const message = document.getElementById("donation-message");
             message.innerText = `${amount.toLocaleString()}円の寄付ありがとうございます！`;
-            setTimeout(() => { message.innerText = ""; }, 3000); // 3秒後にメッセージ消去
+            setTimeout(() => { message.innerText = ""; }, 3000);
             if (donationTotal >= 50000000) {
                 message.innerText = "目標達成！地域児童センター建設が実現します。";
             }
