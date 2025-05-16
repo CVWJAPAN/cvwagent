@@ -28,23 +28,31 @@
         <p>寄付総額: <span id="donation-total">0</span> 円</p>
         <button onclick="addDonation(500)">500円</button>
         <button onclick="addDonation(1000)">1000円</button>
-        <button onclick="addDonation(5000)">5000円</button> </div>
+        <button onclick="addDonation(5000)">5000円</button>
+    </div>
 
     <h2>食料支援依頼</h2>
     <form id="support-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-        <input name="content" placeholder="支援内容（例: 米5kg)" required> <select name="allergy">
+        <input name="content" placeholder="支援内容（例: 米5kg)" required>
+        <select name="allergy">
             <option value="none">アレルギーなし</option>
             <option value="egg">卵</option>
             <option value="milk">乳製品</option>
-            <option value="wheat">小麦</option> <option value="buckwheat">そば</option> <option value="peanut">落花生</option> <option value="shrimp">えび</option> <option value="crab">かに</option> </select>
-        <input name="address" placeholder="住所" required> <button type="submit">依頼を送信</button> </form>
+            <option value="wheat">小麦</option>
+            <option value="buckwheat">そば</option>
+            <option value="peanut">落花生</option>
+            <option value="shrimp">えび</option>
+            <option value="crab">かに</option>
+            </select>
+        <input name="address" placeholder="住所" required>
+        <button type="submit">依頼を送信</button>
+    </form>
 
     <h2>ARでメニュー確認</h2>
     <div id="ar-section">
-        <p>カスタムマーカーで確認（<a href="./custom-marker.png" target="_blank">マーカー画像PNGをダウンロード・印刷</a>）</p>
-
+        <p>カスタムマーカーで確認（<a href="./cvw-marker.png" target="_blank">マーカー画像PNGをダウンロード・印刷</a>）</p>
         <a-scene
-            mindar-image="imageTargetSrc: ./custom-marker.patt; maxTrack: 1;"
+            mindar-image="imageTargetSrc: ./targets.mind; maxTrack: 1;"
             embedded
             color-space="sRGB"
             renderer="colorManagement: true, physicallyCorrectLights: true"
