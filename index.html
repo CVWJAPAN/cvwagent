@@ -29,27 +29,27 @@
 <body>
     <div id="welcome-screen">
         <h1>Global Kids Support Hub</h1>
-        <p>「みんなの居場所おあがり」が地方の貧困世帯を支援！非常食および賞味期限切れの食品は配布しません。配布先が不明な場合は配布できません。</p>
+        <p>「みんなの居場所おあがり」が地方の貧困世帯を支援！地域児童センター建設を目指します。非常食および賞味期限切れの食品は配布しません。配布先が不明な場合は配布できません。</p>
         <p><strong>注意:</strong> 配布には住所が必要です。個人情報は厳格に管理し、支援目的以外には使用しません。<a href="https://cvwjapan-1.jimdosite.com/privacy-policy" target="_blank">プライバシーポリシー</a></p>
         <button class="button" onclick="startHub()">ハブを始める</button>
     </div>
     <div id="hub-container">
         <h1>Global Kids Support Hub</h1>
-        <div id="points">ポイント残高: <span id="points-value">100</span> Supportポイント</div>
-        <button class="button" onclick="upgradePremium()">プレミアム会員になる（500円/月）</button>
-        <h2>Kids Helper AIに相談</h2>
-        <div id="chat-box">
-            <div class="chat-message hub-message">Kids Helper AI: こんにちは！「みんなの居場所おあがり」が地方の貧困世帯を支援します。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。寄付はこちら: <a href="https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS" target="_blank">Square支払いリンク</a></div>
-        </div>
-        <input type="text" id="user-input" placeholder="相談を入力..." onkeypress="if(event.key === 'Enter') sendMessage()">
-        <button onclick="sendMessage()" class="button">送信</button>
-        <h2>寄付状況</h2>
+        <h2>寄付状況（地域児童センター建設目標: 50,000,000円）</h2>
         <div id="donation-counter">
-            <p>寄付総額: <span id="donation-total">0</span> 円 (目標: 10000円)</p>
+            <p>寄付総額: <span id="donation-total">0</span> 円 (目標: 50,000,000円)</p>
             <button class="button" onclick="addDonation(100)">100円寄付</button>
             <button class="button" onclick="addDonation(500)">500円寄付</button>
             <p id="donation-message"></p>
         </div>
+        <div id="points">ポイント残高: <span id="points-value">100</span> Supportポイント</div>
+        <button class="button" onclick="upgradePremium()">プレミアム会員になる（500円/月）</button>
+        <h2>Kids Helper AIに相談</h2>
+        <div id="chat-box">
+            <div class="chat-message hub-message">Kids Helper AI: こんにちは！「みんなの居場所おあがり」が地方の貧困世帯を支援します。地域児童センター建設を目指しています。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。寄付はこちら: <a href="https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS" target="_blank">Square支払いリンク</a></div>
+        </div>
+        <input type="text" id="user-input" placeholder="相談を入力..." onkeypress="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()" class="button">送信</button>
         <h2>食料支援依頼（地方の貧困世帯向け）</h2>
         <input type="text" id="support-input" placeholder="支援内容（例: 米5kg）..." onkeypress="if(event.key === 'Enter') requestSupport()">
         <select id="disability">
@@ -74,7 +74,7 @@
         let userPoints = 100;
         let isPremium = false;
         let userProfile = { childAge: 5, needs: ["発達"] };
-        let donationTotal = 0; // 初期値を0円に変更
+        let donationTotal = 0; // 初期値を0円に
 
         function startHub(){
             document.getElementById("welcome-screen").style.display="none";
@@ -98,11 +98,11 @@
 
         function getAIResponse(e){
             if(e.includes("貧困")){
-                return "「みんなの居場所おあがり」は地方の貧困世帯向けに食料支援を提供します。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。依頼は下のフォームから。寄付はこちら: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>Square支払いリンク</a>";
+                return "「みんなの居場所おあがり」は地方の貧困世帯向けに食料支援を提供します。地域児童センター建設を目指しています。非常食および賞味期限切れの食品は配布しません。配布には住所が必要です。個人情報は厳格に管理します。依頼は下のフォームから。寄付はこちら: <a href='https://checkout.square.site/merchant/MLX30TSTRDSNB/checkout/RLEFR7MZEVMZKTKADM4TVTAS' target='_blank'>Square支払いリンク</a>";
             }else if(e.includes("個人情報")){
                 return "配布には住所が必要です。個人情報は支援目的のみに使用し、厳格に管理します。詳細は<a href='https://cvwjapan-1.jimdosite.com/privacy-policy' target='_blank'>プライバシーポリシー</a>をご覧ください。";
             }else{
-                return "「みんなの居場所おあがり」では食料支援が可能です。配布先住所を指定してください。"+(isPremium?"<span class='premium'>プレミアム特典: 優先予約</span>":"");
+                return "「みんなの居場所おあがり」では食料支援が可能です。地域児童センター建設にご協力ください。配布先住所を指定してください。"+(isPremium?"<span class='premium'>プレミアム特典: 優先予約</span>":"");
             }
         }
 
@@ -123,12 +123,12 @@
 
         function addDonation(amount) {
             donationTotal += amount;
-            document.getElementById("donation-total").innerText = donationTotal;
+            document.getElementById("donation-total").innerText = donationTotal.toLocaleString(); // 3桁区切り
             const message = document.getElementById("donation-message");
-            message.innerText = `${amount}円の寄付ありがとうございます！`;
+            message.innerText = `${amount.toLocaleString()}円の寄付ありがとうございます！`;
             setTimeout(() => { message.innerText = ""; }, 3000); // 3秒後にメッセージ消去
-            if (donationTotal >= 10000) {
-                message.innerText = "目標達成！次の支援準備に入ります。";
+            if (donationTotal >= 50000000) {
+                message.innerText = "目標達成！地域児童センター建設が実現します。";
             }
         }
 
