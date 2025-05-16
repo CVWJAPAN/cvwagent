@@ -7,11 +7,17 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        body { margin: 0; padding: 20px; text-align: center }
-        #hub-container { max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px }
-        #ar-section { margin: 30px auto; max-width: 600px; background: #fff; padding: 20px }
-        a-scene { width: 100%; height: 300px; max-height: 300px; overflow: hidden }
-        input, select { width: 90%; padding: 8px; margin: 5px }
+        body { margin: 0; padding: 20px; text-align: center; font-family: sans-serif; background-color: #f0f0f0; }
+        #hub-container { max-width: 600px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        #ar-section { margin: 30px auto; max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+        /* ARシーンのサイズ調整 */
+        a-scene { width: 100%; height: 400px; max-height: 400px; overflow: hidden; border: 1px solid #ccc; border-radius: 8px; } /* 高さを少し大きくしました */
+        input, select, button { width: 90%; padding: 10px; margin: 8px auto; display: block; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; } /* フォーム要素のスタイル調整 */
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; transition: background-color 0.3s ease; }
+        button:hover { background-color: #45a049; }
+        #donation-counter button { display: inline-block; width: auto; margin: 5px; padding: 8px 15px; } /* 寄付ボタンのスタイル調整 */
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -22,43 +28,124 @@
         <p>寄付総額: <span id="donation-total">0</span> 円</p>
         <button onclick="addDonation(500)">500円</button>
         <button onclick="addDonation(1000)">1000円</button>
-    </div>
+        <button onclick="addDonation(5000)">5000円</button> </div>
+
     <h2>食料支援依頼</h2>
     <form id="support-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-        <input name="content" placeholder="支援内容（例: 米5kg)">
-        <select name="allergy">
+        <input name="content" placeholder="支援内容（例: 米5kg)" required> <select name="allergy">
             <option value="none">アレルギーなし</option>
             <option value="egg">卵</option>
             <option value="milk">乳製品</option>
-        </select>
-        <input name="address" placeholder="住所">
-        <button type="submit">依頼</button>
-    </form>
+            <option value="wheat">小麦</option> <option value="buckwheat">そば</option> <option value="peanut">落花生</option> <option value="shrimp">えび</option> <option value="crab">かに</option> </select>
+        <input name="address" placeholder="住所" required> <button type="submit">依頼を送信</button> </form>
+
     <h2>ARでメニュー確認</h2>
     <div id="ar-section">
-        <p>カスタムマーカーで確認（<a href="./custom-marker.png">PNG</a>を印刷してください）</p>
-        <a-scene mindar-image="imageTargetSrc: ./custom-marker.patt; maxTrack: 1;" embedded>
+        <p>カスタムマーカーで確認（<a href="./custom-marker.png" target="_blank">マーカー画像PNGをダウンロード・印刷</a>）</p>
+
+        <a-scene
+            mindar-image="imageTargetSrc: ./custom-marker.patt; maxTrack: 1;"
+            embedded
+            color-space="sRGB"
+            renderer="colorManagement: true, physicallyCorrectLights: true"
+            vr-mode-ui="enabled: false"
+            device-orientation-permission-ui="enabled: false"
+        >
             <a-assets>
-                <img id="custom" src="./custom-marker.png" />
-            </a-assets>
+                </a-assets>
+
             <a-entity mindar-image-target="targetIndex: 0">
-                <a-text value="メニュー: 米5kg\nアレルギー: 卵不使用" color="white" position="0 0.5 0" scale="1 1 1" align="center"></a-text>
-                <a-box position="0 0.5 -0.5" rotation="0 45 0" color="#4CC3D9" scale="0.5 0.5 0.5"></a-box>
-                <a-cylinder position="0.5 0.5 -0.5" radius="0.2" height="0.5" color="#FF6347"></a-cylinder>
-            </a-entity>
+                <a-text
+                    value="メニュー: 米5kg\nアレルギー: 卵不使用"
+                    color="#333"           /* テキストの色を黒に変更 */
+                    position="0 0.5 0"      /* マーカーの上0.5の位置 */
+                    scale="0.8 0.8 0.8"     /* スケールを調整 */
+                    align="center"
+                    baseline="top"          /* 上揃えにする */
+                    width="2"               /* テキストの幅を指定 */
+                    wrap-count="20"         /* 折り返し文字数 (目安) */
+                ></a-text>
+
+                <a-box
+                    position="-0.5 0.2 0" /* 位置を調整 */
+                    rotation="0 45 0"
+                    color="#4CC3D9"
+                    scale="0.3 0.3 0.3" /* スケールを調整 */
+                ></a-box>
+                <a-cylinder
+                    position="0.5 0.2 0" /* 位置を調整 */
+                    radius="0.15"        /* 半径を調整 */
+                    height="0.3"         /* 高さを調整 */
+                    color="#FF6347"
+                ></a-cylinder>
+
+                 </a-entity>
+
             <a-entity camera></a-entity>
         </a-scene>
     </div>
 </div>
+
 <script>
+    // 寄付総額をローカルストレージに保存する機能を追加（ブラウザを閉じてもある程度維持される）
+    document.addEventListener('DOMContentLoaded', (event) => {
+        let savedTotal = localStorage.getItem('donationTotal');
+        if (savedTotal) {
+            document.getElementById("donation-total").innerText = savedTotal;
+        }
+    });
+
     function addDonation(amount) {
         let total = parseInt(document.getElementById("donation-total").innerText) || 0;
         total += amount;
         document.getElementById("donation-total").innerText = total;
+        // 合計をローカルストレージに保存
+        localStorage.setItem('donationTotal', total);
     }
+
+    // フォーム送信処理
     document.getElementById("support-form").addEventListener("submit", function(e) {
-        e.preventDefault();
-        fetch(this.action, { method: "POST", body: new FormData(this) }).then(r => alert("送信完了"));
+        // フォームのaction属性がデフォルトのplaceholderのままか確認
+        if (this.action === "https://formspree.io/f/YOUR_FORM_ID") {
+            alert("エラー: フォームの送信先(Formspree ID)が設定されていません。\nコード内の 'YOUR_FORM_ID' を置き換えてください。");
+            e.preventDefault(); // 送信をキャンセル
+            return;
+        }
+
+        e.preventDefault(); // デフォルトのフォーム送信をキャンセル
+
+        // FormDataオブジェクトを作成
+        const formData = new FormData(this);
+
+        // fetch APIを使って非同期でフォームデータを送信
+        fetch(this.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                'Accept': 'application/json' // FormspreeにJSONレスポンスを要求
+            }
+        }).then(response => {
+            if (response.ok) { // レスポンスが成功 (status 200-299)
+                alert("食料支援依頼が送信されました。ありがとうございます！");
+                document.getElementById("support-form").reset(); // フォームをリセット
+                 // オプション: 送信成功後に他の処理（ページ遷移など）
+            } else { // レスポンスが失敗
+                // Formspreeからのエラーメッセージを取得する場合
+                response.json().then(data => {
+                    if (Object.hasOwnProperty.call(data, 'errors')) {
+                        alert(data["errors"].map(error => error["message"]).join(", "));
+                    } else {
+                        alert("フォーム送信中にエラーが発生しました。再度お試しください。");
+                    }
+                }).catch(() => {
+                    alert("フォーム送信中に不明なエラーが発生しました。");
+                });
+            }
+        }).catch(error => {
+            // ネットワークエラーなど、fetch自体が失敗した場合
+            alert("ネットワークエラーにより送信できませんでした。インターネット接続を確認してください。");
+            console.error('Fetch error:', error);
+        });
     });
 </script>
 </body>
